@@ -174,6 +174,9 @@ class Config(object):
     LEARNING_RATE = 0.001
     LEARNING_MOMENTUM = 0.9
 
+    # Optimizer, experimental supported values are 'SGD' and 'Adam'
+    OPTIMIZER = 'SGD'
+
     # Weight decay regularization
     WEIGHT_DECAY = 0.0001
 

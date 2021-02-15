@@ -2374,17 +2374,31 @@ class MaskRCNN():
         else:
             workers = multiprocessing.cpu_count()
 
+        if self.config.STEPS_PER_EPOCH == -1:
+            steps_per_epoch = len(train_dataset.image_ids) // self.config.BATCH_SIZE
+        else:
+            steps_per_epoch = self.config.STEPS_PER_EPOCH
+
+        if self.config.VALIDATION_STEPS == -1:
+            validation_steps = len(val_dataset.image_ids) // self.config.BATCH_SIZE
+        else:
+            validation_steps = self.config.VALIDATION_STEPS
+
+        print("steps_per_epoch: ", steps_per_epoch)
+        print("validation_steps", validation_steps)
+
         self.keras_model.fit_generator(
             train_generator,
             initial_epoch=self.epoch,
             epochs=epochs,
-            steps_per_epoch=self.config.STEPS_PER_EPOCH,
+            steps_per_epoch=steps_per_epoch,
             callbacks=callbacks,
             validation_data=val_generator,
-            validation_steps=self.config.VALIDATION_STEPS,
+            validation_steps=validation_steps,
             max_queue_size=100,
             workers=workers,
             use_multiprocessing=True,
+            verbose=0
         )
         self.epoch = max(self.epoch, epochs)
 

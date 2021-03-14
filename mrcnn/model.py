@@ -2281,7 +2281,8 @@ class MaskRCNN(object):
             "*epoch*", "{epoch:04d}")
 
     def train(self, train_dataset, val_dataset, learning_rate, epochs, layers,
-              augmentation=None, custom_callbacks=None, no_augmentation_sources=None):
+              augmentation=None, custom_callbacks=None, no_augmentation_sources=None,
+              patience=10):
         """Train the model.
         train_dataset, val_dataset: Training and validation Dataset objects.
         learning_rate: The learning rate to train with
@@ -2344,7 +2345,14 @@ class MaskRCNN(object):
             keras.callbacks.TensorBoard(log_dir=self.log_dir,
                                         histogram_freq=0, write_graph=True, write_images=False),
             keras.callbacks.ModelCheckpoint(self.checkpoint_path,
-                                            verbose=0, save_weights_only=True),
+                                            verbose=1,
+                                            save_best_only=True,
+                                            save_weights_only=True),
+            keras.callbacks.EarlyStopping(monitor='val_loss',
+                                          patience=patience,
+                                          verbose=1,
+                                          restore_best_weights=True
+                                          ),
         ]
 
         # Add custom callbacks to the list
@@ -2365,6 +2373,8 @@ class MaskRCNN(object):
         else:
             workers = multiprocessing.cpu_count()
 
+        # TODO for testing
+        workers = 1
         log(f"Number of workers: {workers}")
 
         history = self.keras_model.fit(

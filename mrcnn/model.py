@@ -2348,11 +2348,6 @@ class MaskRCNN(object):
                                             verbose=1,
                                             save_best_only=True,
                                             save_weights_only=True),
-            keras.callbacks.EarlyStopping(monitor='val_loss',
-                                          patience=patience,
-                                          verbose=1,
-                                          restore_best_weights=True
-                                          ),
         ]
 
         # Add custom callbacks to the list
@@ -2373,10 +2368,6 @@ class MaskRCNN(object):
         else:
             workers = multiprocessing.cpu_count()
 
-        # TODO for testing
-        workers = 1
-        log(f"Number of workers: {workers}")
-
         history = self.keras_model.fit(
             train_generator,
             initial_epoch=self.epoch,
@@ -2388,7 +2379,7 @@ class MaskRCNN(object):
             validation_steps=self.config.VALIDATION_STEPS,
             max_queue_size=100,
             workers=workers,
-            use_multiprocessing=workers > 1,
+            use_multiprocessing=self.config.USE_MULTIPROCESSING,
         )
         self.epoch = max(self.epoch, epochs)
         return history
@@ -2884,3 +2875,4 @@ def denorm_boxes_graph(boxes, shape):
     scale = tf.concat([h, w, h, w], axis=-1) - tf.constant(1.0)
     shift = tf.constant([0., 0., 1., 1.])
     return tf.cast(tf.round(tf.multiply(boxes, scale) + shift), tf.int32)
+
